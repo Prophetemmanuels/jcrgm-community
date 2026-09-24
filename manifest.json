@@ -1,0 +1,18 @@
+{
+  "short_name": "JCRGM",
+  "name": "The JCRGM Community - Jesus Christ Redeems Global Ministries",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192 512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "./index.html",
+  "background_color": "#0b141a",
+  "theme_color": "#008069",
+  "display": "standalone",
+  "orientation": "portrait",
+  "description": "The official church community, prayer altar, Bible reader, and live service stream for Jesus Christ Redeems Global Ministries (Meanwood Ndeke Phase 2, Lusaka, Zambia)."
+}

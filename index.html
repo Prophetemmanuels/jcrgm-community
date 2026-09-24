@@ -1,28 +1,1217 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta name="theme-color" content="#008069" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="JCRGM Community" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="apple-touch-icon" href="/favicon.svg" />
-    <link rel="manifest" href="/manifest.json" />
-    <title>The JCRGM Community | Jesus Christ Reigns Gospel Ministry</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js')
-            .then(reg => console.log('JCRGM ServiceWorker registered:', reg.scope))
-            .catch(err => console.error('JCRGM ServiceWorker failed:', err));
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>The JCRGM Community | Jesus Christ Redeems Global Ministries</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#008069">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="JCRGM Community">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="apple-touch-icon" href="favicon.svg">
+  <style>
+    :root {
+      --wa-primary: #008069;
+      --wa-primary-dark: #005c4b;
+      --wa-secondary: #25d366;
+      --wa-accent: #00a884;
+      --gold-primary: #dcb955;
+      --gold-light: #fbf3d8;
+      --bg-dark: #111b21;
+      --bg-panel: #202c33;
+      --bg-bubble-in: #202c33;
+      --bg-bubble-out: #005c4b;
+      --text-main: #e9edef;
+      --text-muted: #8696a0;
+      --border-dark: #222d34;
+      --danger-red: #e11d48;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { background: #0b141a; color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
+
+    /* Left Icon Action Strip (Telegram / Discord Style) */
+    .icon-strip { width: 68px; background: var(--bg-panel); display: flex; flex-direction: column; align-items: center; padding: 12px 0; border-right: 1px solid #2a3942; justify-content: space-between; flex-shrink: 0; z-index: 20; }
+    .strip-top { display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%; }
+    .strip-btn { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-muted); font-size: 20px; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); position: relative; border: none; background: transparent; }
+    .strip-btn:hover { background: rgba(255,255,255,0.08); color: #fff; transform: scale(1.06); }
+    .strip-btn.active { background: var(--wa-primary); color: white; box-shadow: 0 4px 12px rgba(0,168,132,0.4); border-radius: 14px; }
+    .badge { position: absolute; top: 2px; right: 2px; background: var(--wa-secondary); color: black; font-size: 10px; font-weight: bold; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+
+    /* Left Drawer */
+    .drawer { width: 360px; min-width: 320px; background: var(--bg-dark); border-right: 1px solid var(--border-dark); display: flex; flex-direction: column; flex-shrink: 0; }
+    .drawer-header { padding: 12px 16px; background: var(--bg-dark); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-dark); }
+    .cross-avatar { width: 38px; height: 38px; border-radius: 50%; background: #070b18; border: 1.5px solid var(--gold-primary); display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--gold-primary); font-weight: bold; box-shadow: 0 0 10px rgba(220,185,85,0.4); }
+
+    /* Search Bar & Add Button */
+    .search-row { padding: 10px 14px; display: flex; gap: 8px; align-items: center; border-bottom: 1px solid var(--border-dark); background: var(--bg-dark); }
+    .search-wrapper { flex: 1; background: var(--bg-panel); border-radius: 10px; display: flex; align-items: center; padding: 7px 12px; gap: 8px; border: 1px solid transparent; }
+    .search-wrapper:focus-within { border-color: var(--wa-accent); }
+    .search-input { background: transparent; border: none; outline: none; color: var(--text-main); font-size: 13.5px; width: 100%; }
+    .btn-add-friend { background: var(--wa-primary); color: white; border: none; width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; transition: background 0.2s; }
+    .btn-add-friend:hover { background: var(--wa-accent); }
+
+    /* Folder Filter Tabs */
+    .folder-bar { display: flex; padding: 0 12px; gap: 8px; overflow-x: auto; border-bottom: 1px solid var(--border-dark); background: var(--bg-dark); }
+    .folder-item { padding: 9px 8px; font-size: 13px; font-weight: 600; color: var(--text-muted); cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; transition: color 0.2s; }
+    .folder-item:hover { color: var(--text-main); }
+    .folder-item.active { color: var(--wa-accent); border-bottom-color: var(--wa-accent); }
+
+    /* Channels List */
+    .channel-list { flex: 1; overflow-y: auto; }
+    .channel-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.03); cursor: pointer; transition: background 0.15s; }
+    .channel-item:hover { background: var(--bg-panel); }
+    .channel-item.active { background: #2a3942; }
+    .channel-avatar { width: 48px; height: 48px; border-radius: 50%; background: #005c4b; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; position: relative; }
+    .online-badge { position: absolute; bottom: 2px; right: 2px; width: 12px; height: 12px; border-radius: 50%; background: var(--wa-secondary); border: 2px solid var(--bg-dark); }
+    .channel-info { flex: 1; min-width: 0; }
+    .channel-top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
+    .channel-title { font-size: 14.5px; font-weight: 600; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .channel-time { font-size: 11px; color: var(--text-muted); }
+    .channel-preview { font-size: 13px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 4px; }
+    .badge-unread { background: var(--wa-accent); color: white; font-size: 10px; font-weight: bold; border-radius: 12px; padding: 2px 7px; margin-left: auto; }
+
+    /* Main Workspace */
+    .main-workspace { flex: 1; display: flex; flex-direction: column; background: #0b141a; position: relative; overflow: hidden; }
+    .doodle-pattern { background-color: #0b141a; background-image: radial-gradient(#1e2b32 1.1px, transparent 1.1px); background-size: 32px 32px; }
+
+    /* Header */
+    .top-header { height: 62px; background: var(--bg-panel); border-bottom: 1px solid var(--border-dark); padding: 0 18px; display: flex; align-items: center; justify-content: space-between; z-index: 10; }
+    .header-details { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+    .header-name { font-size: 15.5px; font-weight: 600; line-height: 1.2; }
+    .header-status { font-size: 12px; color: var(--wa-secondary); }
+    .action-group { display: flex; align-items: center; gap: 8px; }
+    .btn-action { background: transparent; border: none; color: #aebac1; font-size: 18px; cursor: pointer; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+    .btn-action:hover { background: rgba(255,255,255,0.08); color: white; transform: scale(1.08); }
+
+    /* Telegram Style Pinned Message Bar */
+    .pinned-banner { background: #182229; border-bottom: 1px solid var(--border-dark); padding: 7px 18px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: background 0.15s; }
+    .pinned-banner:hover { background: var(--bg-panel); }
+    .pinned-bar-line { width: 3px; height: 32px; background: var(--wa-accent); border-radius: 2px; }
+    .pinned-meta { flex: 1; min-width: 0; }
+    .pinned-title { font-size: 11px; font-weight: bold; color: var(--wa-accent); text-transform: uppercase; }
+    .pinned-desc { font-size: 12.5px; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* Notification Banner */
+    .notif-bar { background: linear-gradient(90deg, #005c4b, #008069); padding: 7px 16px; display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: white; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .btn-enable-notif { background: white; color: #005c4b; border: none; padding: 4px 12px; border-radius: 12px; font-weight: bold; font-size: 11px; cursor: pointer; }
+
+    /* Chat Messages Scroller */
+    .chat-scroller { flex: 1; overflow-y: auto; padding: 20px 24px; display: flex; flex-direction: column; gap: 10px; }
+    .date-badge { align-self: center; background: #182229; color: var(--text-muted); font-size: 11px; font-weight: 600; padding: 5px 14px; border-radius: 12px; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+
+    /* Message Bubbles */
+    .msg-envelope { display: flex; flex-direction: column; max-width: 68%; min-width: 160px; position: relative; }
+    .msg-envelope.incoming { align-self: flex-start; }
+    .msg-envelope.outgoing { align-self: flex-end; }
+    .bubble { padding: 9px 14px 6px 14px; border-radius: 12px; font-size: 14px; line-height: 1.45; word-wrap: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+    .incoming .bubble { background: var(--bg-bubble-in); border-top-left-radius: 2px; }
+    .outgoing .bubble { background: var(--bg-bubble-out); border-top-right-radius: 2px; }
+    
+    .author-tag { font-size: 12px; font-weight: bold; color: var(--wa-secondary); margin-bottom: 3px; display: flex; align-items: center; gap: 6px; }
+    .role-pill { font-size: 9.5px; padding: 1px 7px; border-radius: 8px; background: rgba(0,168,132,0.2); color: var(--wa-secondary); font-weight: 600; }
+    .msg-meta { display: flex; align-items: center; justify-content: flex-end; gap: 4px; margin-top: 4px; font-size: 10.5px; color: rgba(255,255,255,0.55); }
+    .ticks { color: #53bdeb; font-weight: bold; }
+
+    /* Altar Prayer Card inside Message */
+    .altar-box { background: rgba(225,29,72,0.12); border: 1px solid rgba(225,29,72,0.35); border-radius: 10px; padding: 10px; margin-top: 8px; }
+    .altar-badge { font-size: 11px; font-weight: bold; color: #fb7185; display: flex; justify-content: space-between; align-items: center; }
+    .btn-agree-amen { background: var(--danger-red); color: white; border: none; padding: 6px 14px; border-radius: 16px; font-size: 11px; font-weight: bold; cursor: pointer; margin-top: 6px; transition: background 0.2s; }
+    .btn-agree-amen:hover { background: #be123c; }
+
+    /* Emoji Reactions Bar */
+    .reactions-row { display: flex; gap: 4px; margin-top: -6px; margin-left: 8px; z-index: 2; align-self: flex-start; }
+    .react-chip { background: #182229; border: 1px solid #2a3942; border-radius: 12px; padding: 2px 7px; font-size: 11px; display: flex; align-items: center; gap: 3px; cursor: pointer; transition: transform 0.15s; }
+    .react-chip:hover { transform: scale(1.15); border-color: var(--wa-accent); }
+
+    /* Composer Bottom Bar */
+    .composer-bar { background: var(--bg-panel); padding: 8px 16px; display: flex; align-items: center; gap: 10px; z-index: 10; border-top: 1px solid var(--border-dark); }
+    .btn-composer { background: none; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+    .btn-composer:hover { color: var(--text-main); background: rgba(255,255,255,0.06); }
+    .input-capsule { flex: 1; background: #2a3942; border-radius: 24px; display: flex; align-items: center; padding: 4px 16px; }
+    .text-chat-input { width: 100%; background: transparent; border: none; outline: none; color: var(--text-main); font-size: 14.5px; padding: 8px 0; }
+    .btn-send { width: 44px; height: 44px; border-radius: 50%; background: var(--wa-accent); color: white; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; flex-shrink: 0; transition: transform 0.15s; box-shadow: 0 2px 8px rgba(0,168,132,0.4); }
+    .btn-send:hover { transform: scale(1.08); background: #009374; }
+
+    /* Overlay Screens (Live Stream, Bible, Sermons, Events) */
+    .overlay-screen { display: none; flex: 1; flex-direction: column; background: var(--bg-dark); overflow: hidden; }
+    .overlay-screen.active { display: flex; }
+    .screen-scroller { flex: 1; overflow-y: auto; padding: 24px; max-width: 900px; margin: 0 auto; width: 100%; }
+
+    /* Live Stream Theatre View */
+    .stream-container { background: #000; border-radius: 16px; overflow: hidden; position: relative; box-shadow: 0 8px 24px rgba(0,0,0,0.5); aspect-ratio: 16 / 9; width: 100%; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; }
+    .stream-video { width: 100%; height: 100%; border: none; }
+    .live-badge { position: absolute; top: 12px; left: 12px; background: #e11d48; color: white; font-size: 11px; font-weight: bold; padding: 4px 10px; border-radius: 12px; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
+    .live-pulse { width: 8px; height: 8px; border-radius: 50%; background: white; animation: ping 1s infinite; }
+    @keyframes ping { 0%{opacity:1;} 50%{opacity:0.3;} 100%{opacity:1;} }
+    .viewers-badge { position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.6); color: white; font-size: 11px; padding: 4px 10px; border-radius: 12px; backdrop-filter: blur(4px); }
+
+    /* Live Chat Stream Bar */
+    .stream-chat-box { background: #182229; border: 1px solid #2a3942; border-radius: 16px; padding: 16px; margin-top: 12px; }
+
+    /* Bible Reader Component */
+    .bible-selector-bar { display: flex; gap: 8px; align-items: center; overflow-x: auto; padding-bottom: 12px; margin-bottom: 16px; border-bottom: 1px solid var(--border-dark); }
+    .btn-book { background: var(--bg-panel); color: var(--text-main); border: 1px solid #2a3942; padding: 7px 16px; border-radius: 12px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: all 0.2s; }
+    .btn-book:hover, .btn-book.active { background: var(--wa-primary); border-color: var(--wa-primary); color: white; }
+    .bible-card { background: #182229; border: 1px solid #2a3942; border-radius: 16px; padding: 22px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+    .verse-p { font-family: Georgia, serif; font-size: 15.5px; line-height: 1.8; margin-bottom: 14px; position: relative; padding-left: 28px; }
+    .verse-idx { position: absolute; left: 0; font-family: sans-serif; font-size: 12px; font-weight: bold; color: var(--wa-accent); }
+    .btn-share-verse { background: var(--wa-primary); color: white; border: none; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; transition: background 0.2s; }
+    .btn-share-verse:hover { background: var(--wa-accent); }
+
+    /* Live Calling Modal */
+    .call-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; }
+    .call-window { width: 92%; max-width: 520px; background: #111b21; border: 1px solid #2a3942; border-radius: 24px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
+    .call-top { padding: 14px 20px; background: #182229; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-dark); }
+    .call-grid { height: 280px; background: #0b141a; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+    .call-avatar { width: 90px; height: 90px; border-radius: 50%; background: #070b18; border: 2px solid var(--gold-primary); display: flex; align-items: center; justify-content: center; font-size: 40px; box-shadow: 0 0 24px rgba(220,185,85,0.4); margin-bottom: 12px; }
+    .call-timer { font-family: monospace; font-size: 13px; color: var(--wa-secondary); margin-top: 4px; }
+    .call-controls { padding: 18px; background: #182229; display: flex; justify-content: center; align-items: center; gap: 20px; border-top: 1px solid var(--border-dark); }
+    .btn-ctrl { width: 50px; height: 50px; border-radius: 50%; border: none; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+    .btn-ctrl.muted { background: var(--danger-red); color: white; }
+    .btn-ctrl.normal { background: #2a3942; color: white; }
+    .btn-ctrl.end { background: var(--danger-red); color: white; transform: rotate(135deg); width: 56px; height: 56px; }
+
+    /* Modals Generic */
+    .modal-box { background: #182229; border: 1px solid #2a3942; border-radius: 20px; width: 90%; max-width: 440px; padding: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.7); }
+    .modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 9998; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+    .form-group { margin-bottom: 14px; }
+    .form-label { font-size: 12px; font-weight: bold; color: var(--wa-accent); display: block; margin-bottom: 6px; }
+    .form-input { width: 100%; background: #202c33; border: 1px solid #2a3942; padding: 11px 14px; border-radius: 10px; color: white; font-size: 13.5px; outline: none; }
+    .btn-submit { width: 100%; background: var(--wa-accent); color: white; border: none; padding: 12px; border-radius: 12px; font-size: 14.5px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+    .btn-submit:hover { background: #009374; }
+  </style>
+</head>
+<body>
+
+  <!-- Left Icon Navigation Strip -->
+  <aside class="icon-strip">
+    <div class="strip-top">
+      <div class="cross-avatar" title="Jesus Christ Redeems Global Ministries (Meanwood Ndeke Phase 2, Lusaka)">✝</div>
+
+      <!-- Chats -->
+      <button class="strip-btn active" id="strip-chats" onclick="switchMainTab('chats')" title="Fellowship & Chats">
+        💬
+        <span class="badge" id="unreadBadge">3</span>
+      </button>
+
+      <!-- Live Stream -->
+      <button class="strip-btn" id="strip-live" onclick="switchMainTab('live')" title="Sunday Live Stream & Service Video" style="color:#ef4444;">
+        🔴
+      </button>
+
+      <!-- Holy Scripture Bible -->
+      <button class="strip-btn" id="strip-bible" onclick="switchMainTab('bible')" title="Holy Scripture & Rhema">
+        📖
+      </button>
+
+      <!-- Audio Pulpit -->
+      <button class="strip-btn" id="strip-sermons" onclick="switchMainTab('sermons')" title="Audio Pulpit & Podcasts">
+        🎙️
+      </button>
+
+      <!-- Calendar -->
+      <button class="strip-btn" id="strip-events" onclick="switchMainTab('events')" title="Church Gatherings & Services">
+        🗓️
+      </button>
+
+      <!-- Tithes & Giving -->
+      <button class="strip-btn" onclick="openModal('modalGiving')" title="Kingdom Giving & Tithes" style="color:var(--wa-secondary);">
+        ❤️
+      </button>
+
+      <!-- Add Friend -->
+      <button class="strip-btn" onclick="openModal('modalAddFriend')" title="Add Member / Friend via Phone or Email">
+        ➕
+      </button>
+    </div>
+
+    <!-- Bottom Install App -->
+    <div>
+      <button class="strip-btn" onclick="openModal('modalInstall')" title="Install Official Mobile App">
+        📲
+      </button>
+    </div>
+  </aside>
+
+  <!-- Left Chats/Channels Drawer -->
+  <aside class="drawer" id="chatsDrawer">
+    <div class="drawer-header">
+      <div>
+        <div style="font-size:16px; font-weight:bold; letter-spacing:-0.2px;">The JCRGM Community</div>
+        <div style="font-size:11px; color:var(--gold-primary); font-weight:600;">Jesus Christ Redeems Global Ministries</div>
+        <div style="font-size:10px; color:var(--text-muted);">Meanwood Ndeke Phase 2, Lusaka</div>
+      </div>
+      <button class="btn-add-friend" onclick="openModal('modalAddFriend')" title="Add New Friend or Group">＋</button>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-row">
+      <div class="search-wrapper">
+        <span style="color:var(--text-muted); font-size:14px;">🔍</span>
+        <input type="text" class="search-input" placeholder="Search chats, scriptures, brethren..." oninput="filterSearch(this.value)">
+      </div>
+    </div>
+
+    <!-- Telegram-Style Channel Folder Tabs -->
+    <div class="folder-bar">
+      <div class="folder-item active" onclick="filterFolderCategory('all', this)">All Chats</div>
+      <div class="folder-item" onclick="filterFolderCategory('official', this)">Official</div>
+      <div class="folder-item" onclick="filterFolderCategory('prayer', this)">Prayer Wall</div>
+      <div class="folder-item" onclick="filterFolderCategory('direct', this)">Friends (DM)</div>
+    </div>
+
+    <!-- Channels List -->
+    <div class="channel-list" id="channelListContainer">
+      
+      <!-- Prophet's Office Direct Line -->
+      <div class="channel-item active" data-cat="official" onclick="loadConversation('prophet_office', this)">
+        <div class="channel-avatar" style="background:#070b18; border:1px solid var(--gold-primary); color:var(--gold-primary);">👑<div class="online-badge"></div></div>
+        <div class="channel-info">
+          <div class="channel-top-row">
+            <span class="channel-title">Prophet's Office (Bishop E. Sakala) ✉️</span>
+            <span class="channel-time">Just now</span>
+          </div>
+          <div class="channel-preview">WhatsApp: 0979 554 970 • Meanwood Ndeke Phase 2</div>
+        </div>
+      </div>
+
+      <!-- General Announcements -->
+      <div class="channel-item" data-cat="official" onclick="loadConversation('announcements', this)">
+        <div class="channel-avatar">📢<div class="online-badge"></div></div>
+        <div class="channel-info">
+          <div class="channel-top-row">
+            <span class="channel-title">General Announcements 🏛️</span>
+            <span class="channel-time">10:45 AM</span>
+          </div>
+          <div class="channel-preview">3-Day Fasting & Prayer Revival Programme</div>
+        </div>
+      </div>
+
+      <!-- Sunday Live Fellowship -->
+      <div class="channel-item" data-cat="official" onclick="loadConversation('sunday', this)">
+        <div class="channel-avatar">⛪<div class="online-badge"></div></div>
+        <div class="channel-info">
+          <div class="channel-top-row">
+            <span class="channel-title">Sunday Live Service 🕊️</span>
+            <span class="channel-time">11:15 AM</span>
+          </div>
+          <div class="channel-preview"><span class="ticks">✓✓</span> Sis Grace: Amen! Praise the Lord!</div>
+        </div>
+      </div>
+
+      <!-- Prayer Warriors -->
+      <div class="channel-item" data-cat="prayer" onclick="loadConversation('prayer', this)">
+        <div class="channel-avatar">🔥<div class="online-badge"></div></div>
+        <div class="channel-info">
+          <div class="channel-top-row">
+            <span class="channel-title">Prayer Warriors Altar 🙏</span>
+            <span class="channel-time">09:30 AM</span>
+          </div>
+          <div class="channel-preview">
+            <span style="color:#fb7185;">[Urgent Petition]</span> Lusaka Midnight Vigil
+            <span class="badge-unread">48</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Daily Rhema -->
+      <div class="channel-item" data-cat="official" onclick="loadConversation('rhema', this)">
+        <div class="channel-avatar">🌅</div>
+        <div class="channel-info">
+          <div class="channel-top-row">
+            <span class="channel-title">Daily Rhema & Scripture 📖</span>
+            <span class="channel-time">06:00 AM</span>
+          </div>
+          <div class="channel-preview">Psalm 91: The Secret Place of Peace</div>
+        </div>
+      </div>
+
+      <!-- Sister Mary Choir Direct -->
+      <div class="channel-item" data-cat="direct" onclick="loadConversation('sister_mary', this)">
+        <div class="channel-avatar">👩🏾</div>
+        <div class="channel-info">
+          <div class="channel-top-row">
+            <span class="channel-title">Sister Mary (Choir Lead)</span>
+            <span class="channel-time">Yesterday</span>
+          </div>
+          <div class="channel-preview">Entrance anthem lyrics uploaded for Sunday</div>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- Main Workspace -->
+  <main class="main-workspace doodle-pattern" id="mainWorkspace">
+    
+    <!-- SCREEN A: LIVE CHAT VIEW -->
+    <div id="screen-chats" style="display:flex; flex-direction:column; height:100%; width:100%;">
+      
+      <!-- Top WhatsApp/Telegram Header -->
+      <header class="top-header">
+        <div class="header-details" onclick="showChannelInfo()">
+          <div class="channel-avatar" id="headerAvatar" style="width:40px; height:40px; font-size:18px;">👑</div>
+          <div>
+            <div class="header-name" id="headerTitle">Prophet's Office (Bishop E. Sakala) ✉️</div>
+            <div class="header-status" id="headerStatus">Online • Prophetic Consultation & Deliverance Desk</div>
+          </div>
+        </div>
+
+        <div class="action-group">
+          <!-- Live Service Stream Shortcut -->
+          <button class="btn-action" onclick="switchMainTab('live')" title="Watch Live Church Service" style="color:#ef4444;">🔴</button>
+          <!-- Audio Call -->
+          <button class="btn-action" onclick="startCall('audio')" title="Voice Prayer Call">📞</button>
+          <!-- Video Call -->
+          <button class="btn-action" onclick="startCall('video')" title="Video Call Fellowship">📹</button>
+          <!-- Bible Lookup -->
+          <button class="btn-action" onclick="switchMainTab('bible')" title="Scripture Lookup">📖</button>
+          <!-- Options -->
+          <button class="btn-action" onclick="showChannelInfo()" title="Channel Details">⋮</button>
+        </div>
+      </header>
+
+      <!-- Push Notification WhatsApp-Style Permission Bar -->
+      <div class="notif-bar" id="notifBar">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span>🔔</span>
+          <span>Enable WhatsApp-style push notifications for new prayers, announcements & live streams</span>
+        </div>
+        <button class="btn-enable-notif" onclick="enablePushNotifications()">Enable Notifications</button>
+      </div>
+
+      <!-- Telegram-Style Pinned Advisory -->
+      <div class="pinned-banner" onclick="focusPinnedAdvisory()">
+        <div class="pinned-bar-line"></div>
+        <div class="pinned-meta">
+          <div class="pinned-title">PINNED PROPHETIC ADVISORY</div>
+          <div class="pinned-desc" id="pinnedText">"Uncommon Harvest & Divine Acceleration" — Meanwood Ndeke Phase 2, Lusaka. WhatsApp: 0979 554 970.</div>
+        </div>
+        <span style="font-size:14px; color:var(--text-muted);">📌</span>
+      </div>
+
+      <!-- Messages History Scroller -->
+      <div class="chat-scroller" id="chatScroller">
+        
+        <div class="date-badge">Today • Lusaka, Zambia</div>
+
+        <!-- Prophetic Message -->
+        <div class="msg-envelope incoming">
+          <div class="bubble">
+            <div class="author-tag">
+              <span>Bishop Emmanuel Sakala</span>
+              <span class="role-pill">Prophet & Presiding Bishop</span>
+            </div>
+            <div>
+              Grace and peace be multiplied unto you beloved family of Jesus Christ Redeems Global Ministries (JCRGM). You are warmly welcome to the official digital sanctuary and prophet's counseling desk. Whether you need spiritual direction, deliverance, marriage counseling, or agreement in prayer, God is ready to turn your story around!
+            </div>
+            <div class="msg-meta">
+              <span>10:00 AM</span>
+            </div>
+          </div>
+          <div class="reactions-row">
+            <div class="react-chip" onclick="addReaction(this, '🙏')">🙏 89</div>
+            <div class="react-chip" onclick="addReaction(this, '🔥')">🔥 64</div>
+            <div class="react-chip" onclick="addReaction(this, '❤️')">❤️ 72</div>
+          </div>
+        </div>
+
+        <!-- Altar Request -->
+        <div class="msg-envelope incoming">
+          <div class="bubble">
+            <div class="author-tag">
+              <span>Intercession Leader</span>
+              <span class="role-pill">Prayer Unit</span>
+            </div>
+            <div>
+              Brethren, let us lift up all families standing in need of breakthrough this week. As declared in Isaiah 53:5 and Amos 9:13, every dry ground is receiving divine rainfall!
+            </div>
+            <div class="altar-box">
+              <div class="altar-badge">
+                <span>🔥 ALTAR INTERCESSION PETITION</span>
+                <span id="altarCount">48 Brethren Praying</span>
+              </div>
+              <button class="btn-agree-amen" onclick="standInPrayer(this)">Stand in Agreement 🙏</button>
+            </div>
+            <div class="msg-meta">
+              <span>10:15 AM</span>
+            </div>
+          </div>
+          <div class="reactions-row">
+            <div class="react-chip" onclick="addReaction(this, '🙏')">🙏 48</div>
+            <div class="react-chip" onclick="addReaction(this, '❤️')">❤️ 23</div>
+          </div>
+        </div>
+
+        <!-- Outgoing Message from User -->
+        <div class="msg-envelope outgoing">
+          <div class="bubble">
+            <div>Amen Bishop! We stand in faith and receive the prophetic word for our families! 🙌</div>
+            <div class="msg-meta">
+              <span>10:20 AM</span>
+              <span class="ticks">✓✓</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Composer Bar -->
+      <footer class="composer-bar">
+        <button class="btn-composer" onclick="insertPraiseEmoji()" title="Instant Amen">🙌</button>
+        <button class="btn-composer" onclick="switchMainTab('bible')" title="Holy Scripture">📖</button>
+        <button class="btn-composer" onclick="openModal('modalAltar')" title="Lay Petition on Prayer Altar">🔥</button>
+
+        <div class="input-capsule">
+          <input type="text" id="chatComposerInput" class="text-chat-input" placeholder="Message or prayer in fellowship..." onkeydown="handleComposerKey(event)">
+        </div>
+
+        <button class="btn-send" onclick="sendChatMessage()">➤</button>
+      </footer>
+
+    </div>
+
+    <!-- SCREEN B: LIVE CHURCH SERVICE STREAM (Broadcast for Everyone) -->
+    <div class="overlay-screen" id="screen-live">
+      <header class="top-header">
+        <div class="header-details">
+          <div style="font-size:24px; color:#ef4444;">🔴</div>
+          <div>
+            <div class="header-name">JCRGM Sunday Live Sanctuary Service</div>
+            <div class="header-status">Broadcasting live from Meanwood Ndeke Phase 2, Lusaka</div>
+          </div>
+        </div>
+        <button class="btn-action" onclick="switchMainTab('chats')" title="Back to Chat">✕</button>
+      </header>
+
+      <div class="screen-scroller">
+        <!-- Live Video Player Frame -->
+        <div class="stream-container">
+          <div class="live-badge">
+            <span class="live-pulse"></span> LIVE NOW
+          </div>
+          <div class="viewers-badge">👁️ 342 Saints Watching</div>
+
+          <!-- Responsive embed video simulation or direct live stream URL -->
+          <iframe 
+            class="stream-video" 
+            src="https://www.youtube-nocookie.com/embed/live_stream?channel=UC4R8DWoMoI7CAwX8_BQ5Azg&autoplay=0" 
+            title="JCRGM Live Sunday Service" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+            allowfullscreen>
+          </iframe>
+        </div>
+
+        <!-- Live Service Info & Realtime WhatsApp Chat Reactions -->
+        <div class="stream-chat-box">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <div>
+              <h3 style="font-size:18px; color:var(--text-main);">Prophetic Breakthrough & Deliverance Service</h3>
+              <p style="font-size:12px; color:var(--wa-secondary);">Ministering: Bishop Emmanuel Sakala • JCRGM Cathedral</p>
+            </div>
+            <button style="background:var(--wa-accent); color:white; border:none; padding:8px 16px; border-radius:20px; font-size:12px; font-weight:bold; cursor:pointer;" onclick="shareLiveToWhatsApp()">
+              📲 Share to WhatsApp
+            </button>
+          </div>
+
+          <div style="background:#111b21; border-radius:12px; padding:12px; margin-bottom:12px;">
+            <div style="font-size:11px; font-weight:bold; color:var(--gold-primary); margin-bottom:6px;">LIVE SERVICE CHAT (WHAT'S HAPPENING NOW):</div>
+            <div style="font-size:13px; line-height:1.6; color:#cfd9df;" id="liveStreamComments">
+              <div><strong>Bro Brian:</strong> The presence of God is so heavy in the sanctuary right now! 🔥</div>
+              <div><strong>Sis Chileshe:</strong> Amen Bishop! I receive my healing in Jesus' name! 🙌</div>
+              <div><strong>Elder Phiri:</strong> Amos 9:13 - Divine acceleration is our portion!</div>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="liveCommentInput" class="form-input" style="flex:1;" placeholder="Type your live Amen or praise report..." onkeydown="if(event.key==='Enter') sendLiveComment()">
+            <button style="background:var(--wa-accent); color:white; border:none; padding:0 20px; border-radius:10px; font-weight:bold; cursor:pointer;" onclick="sendLiveComment()">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN C: HOLY SCRIPTURE (NKJV) WITH SHARING -->
+    <div class="overlay-screen" id="screen-bible">
+      <header class="top-header">
+        <div class="header-details">
+          <div style="font-size:24px;">📖</div>
+          <div>
+            <div class="header-name">Holy Scripture (NKJV) — Daily Rhema</div>
+            <div class="header-status">Read, Meditate & Share Directly to Fellowship</div>
+          </div>
+        </div>
+        <button class="btn-action" onclick="switchMainTab('chats')" title="Back to Chat">✕</button>
+      </header>
+
+      <div class="screen-scroller">
+        <div class="bible-selector-bar">
+          <button class="btn-book active" onclick="loadBibleChapter('psalm23', this)">Psalm 23</button>
+          <button class="btn-book" onclick="loadBibleChapter('john14', this)">John 14</button>
+          <button class="btn-book" onclick="loadBibleChapter('phil4', this)">Philippians 4</button>
+          <button class="btn-book" onclick="loadBibleChapter('romans8', this)">Romans 8</button>
+          <button class="btn-book" onclick="loadBibleChapter('isaiah40', this)">Isaiah 40</button>
+        </div>
+
+        <div class="bible-card" id="bibleDisplay">
+          <h3 style="font-size:18px; color:var(--text-main); margin-bottom:4px;" id="bibleChapterTitle">📖 Psalm 23 (NKJV) — The Good Shepherd</h3>
+          <p style="font-size:12px; color:var(--wa-accent); margin-bottom:16px;">Morning Rhema Meditation for JCRGM Brethren</p>
+
+          <div id="bibleVersesList">
+            <div class="verse-p"><span class="verse-idx">1</span> The LORD is my shepherd; I shall not want.</div>
+            <div class="verse-p"><span class="verse-idx">2</span> He makes me to lie down in green pastures; He leads me beside the still waters.</div>
+            <div class="verse-p"><span class="verse-idx">3</span> He restores my soul; He leads me in the paths of righteousness For His name’s sake.</div>
+            <div class="verse-p"><span class="verse-idx">4</span> Yea, though I walk through the valley of the shadow of death, I will fear no evil; For You are with me; Your rod and Your staff, they comfort me.</div>
+            <div class="verse-p"><span class="verse-idx">5</span> You prepare a table before me in the presence of my enemies; You anoint my head with oil; My cup runs over.</div>
+            <div class="verse-p"><span class="verse-idx">6</span> Surely goodness and mercy shall follow me All the days of my life; And I will dwell in the house of the LORD Forever.</div>
+          </div>
+
+          <button class="btn-share-verse" onclick="sharePassageToChat()">
+            💬 Share Entire Chapter to Active Chat
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN D: PULPIT & RADIO -->
+    <div class="overlay-screen" id="screen-sermons">
+      <header class="top-header">
+        <div class="header-details">
+          <div style="font-size:24px;">🎙️</div>
+          <div>
+            <div class="header-name">JCRGM Pulpit Audio & Anointed Podcasts</div>
+            <div class="header-status">Bishop Emmanuel Sakala & Sanctuary Ministers</div>
+          </div>
+        </div>
+        <button style="background:var(--danger-red); color:white; border:none; padding:7px 16px; border-radius:20px; font-size:12px; font-weight:bold; cursor:pointer;" onclick="toggleRadioStream(this)">
+          📻 24/7 Church Radio: OFF
+        </button>
+      </header>
+      <div class="screen-scroller">
+        <div class="bible-card">
+          <h3 style="font-size:17px; margin-bottom:6px;">Uncommon Harvest & Divine Acceleration</h3>
+          <p style="font-size:12px; color:var(--wa-accent); margin-bottom:10px;">Bishop Emmanuel Sakala • Amos 9:13 • 46 mins</p>
+          <p style="font-size:13.5px; color:#cfd9df; line-height:1.6; margin-bottom:14px;">Prophetic decree releasing divine speed over every delayed blessing in business, marriage, and family.</p>
+          <button class="btn-share-verse" onclick="playAudioMessage(this, 'Uncommon Harvest')">▶ Listen to Sermon (46m)</button>
+        </div>
+
+        <div class="bible-card">
+          <h3 style="font-size:17px; margin-bottom:6px;">The Mystery of Prophetic Deliverance</h3>
+          <p style="font-size:12px; color:var(--wa-accent); margin-bottom:10px;">Bishop Emmanuel Sakala • Obadiah 1:17 • 38 mins</p>
+          <p style="font-size:13.5px; color:#cfd9df; line-height:1.6; margin-bottom:14px;">Upon Mount Zion there shall be deliverance and holiness, and the house of Jacob shall possess their possessions.</p>
+          <button class="btn-share-verse" onclick="playAudioMessage(this, 'Prophetic Deliverance')">▶ Listen to Sermon (38m)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN E: GATHERINGS CALENDAR -->
+    <div class="overlay-screen" id="screen-events">
+      <header class="top-header">
+        <div class="header-details">
+          <div style="font-size:24px;">🗓️</div>
+          <div>
+            <div class="header-name">JCRGM Ministry Calendar & Service Times</div>
+            <div class="header-status">Meanwood Ndeke Phase 2, Lusaka, Zambia</div>
+          </div>
+        </div>
+      </header>
+      <div class="screen-scroller">
+        <div class="bible-card">
+          <h3 style="font-size:17px; margin-bottom:6px;">⛪ Sunday Celebration Service</h3>
+          <p style="font-size:12px; color:var(--wa-accent); margin-bottom:10px;">Every Sunday • 08:30 AM & 10:45 AM • Meanwood Ndeke Phase 2</p>
+          <p style="font-size:13.5px; color:#cfd9df; line-height:1.6; margin-bottom:14px;">Encounter high-voltage praise, prophetic preaching, and deliverance with Bishop Emmanuel Sakala.</p>
+          <button class="btn-share-verse" style="background:#005c4b;" onclick="alert('Reminder set on your phone for Sunday Service!')">🔔 Set Service Reminder</button>
+        </div>
+
+        <div class="bible-card">
+          <h3 style="font-size:17px; margin-bottom:6px;">🔥 Wednesday Deliverance & Miracle Service</h3>
+          <p style="font-size:12px; color:var(--wa-accent); margin-bottom:10px;">Every Wednesday • 05:30 PM • Sanctuary</p>
+          <p style="font-size:13.5px; color:#cfd9df; line-height:1.6; margin-bottom:14px;">Midweek spiritual recharge, anointing, and deliverance prayers.</p>
+          <button class="btn-share-verse" style="background:#005c4b;" onclick="alert('Reminder set for Midweek Service!')">🔔 Set Service Reminder</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ================= MODALS ================= -->
+
+  <!-- 1. LIVE CALL MODAL (Audio & Video) -->
+  <div class="call-modal" id="modalCall">
+    <div class="call-window">
+      <div class="call-top">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="width:10px; height:10px; border-radius:50%; background:var(--wa-secondary); display:inline-block; animation:ping 1s infinite;"></span>
+          <span style="font-size:13px; font-weight:bold;" id="callTypeLabel">Voice Prayer Call</span>
+        </div>
+        <div style="font-size:11px; color:var(--wa-secondary); background:rgba(37,211,102,0.15); padding:2px 8px; border-radius:10px;">End-to-End Encrypted</div>
+      </div>
+
+      <div class="call-grid" id="callMediaArea">
+        <div class="call-avatar" id="callAvatar">👑</div>
+        <div style="font-size:17px; font-weight:bold;" id="callTargetName">Bishop Emmanuel Sakala</div>
+        <div style="font-size:12px; color:var(--text-muted);">Connected to Prophet's Desk</div>
+        <div class="call-timer" id="callTimer">00:18</div>
+      </div>
+
+      <div class="call-controls">
+        <button class="btn-ctrl normal" id="btnMic" onclick="toggleMuteMic(this)" title="Mute/Unmute">🎤</button>
+        <button class="btn-ctrl normal" id="btnCam" onclick="toggleCamera(this)" title="Toggle Camera">📹</button>
+        <button class="btn-ctrl normal" onclick="alert('Hand raised to pray or testify!')" title="Raise Hand">✋</button>
+        <button class="btn-ctrl end" onclick="endCall()" title="End Call">📞</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. ADD FRIEND (By Phone Number, WhatsApp or Email) -->
+  <div class="modal-backdrop" id="modalAddFriend">
+    <div class="modal-box">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <div style="font-size:17px; font-weight:bold; display:flex; align-items:center; gap:8px;">
+          <span>👤</span> Add Church Member or Friend
+        </div>
+        <button onclick="closeModal('modalAddFriend')" style="background:none; border:none; color:var(--text-muted); font-size:20px; cursor:pointer;">✕</button>
+      </div>
+      <p style="font-size:12.5px; color:var(--text-muted); margin-bottom:16px;">
+        Enter a brother or sister's mobile phone number or email to start direct WhatsApp-style fellowship.
+      </p>
+
+      <form onsubmit="handleAddFriend(event)">
+        <div class="form-group">
+          <label class="form-label">Full Name:</label>
+          <input type="text" id="friendName" class="form-input" placeholder="e.g. Brother Samuel Banda" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone Number (Zambia or International):</label>
+          <input type="tel" id="friendPhone" class="form-input" placeholder="e.g. +260 979 554 970 or 097...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address (Optional):</label>
+          <input type="email" id="friendEmail" class="form-input" placeholder="e.g. member@jcrgm.zm">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ministry Department:</label>
+          <select id="friendDept" class="form-input">
+            <option>Sanctuary Member</option>
+            <option>Youth & Young Adults</option>
+            <option>Choir & Praise Team</option>
+            <option>Intercession & Prayer Altar</option>
+            <option>Ushering & Protocol</option>
+            <option>Media & Broadcast Team</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-submit">Add to My Fellowship</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. ALTAR PRAYER PETITION MODAL -->
+  <div class="modal-backdrop" id="modalAltar">
+    <div class="modal-box">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <div style="font-size:17px; font-weight:bold; display:flex; align-items:center; gap:8px;">
+          <span>🔥</span> Lay Petition on Altar of Prayer
+        </div>
+        <button onclick="closeModal('modalAltar')" style="background:none; border:none; color:var(--text-muted); font-size:20px; cursor:pointer;">✕</button>
+      </div>
+      <p style="font-size:12.5px; color:var(--text-muted); margin-bottom:16px;">
+        "The effective, fervent prayer of a righteous man avails much" (James 5:16).
+      </p>
+      <form onsubmit="handleAltarSubmit(event)">
+        <div class="form-group">
+          <label class="form-label">Petition Category:</label>
+          <select id="petitionCategory" class="form-input">
+            <option>Health & Supernatural Healing</option>
+            <option>Financial Breakthrough & Debt Freedom</option>
+            <option>Family Deliverance & Marriage Peace</option>
+            <option>Career, Job & Business Elevation</option>
+            <option>Spiritual Growth & Prophetic Direction</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Your Specific Prayer Request:</label>
+          <textarea id="petitionText" class="form-input" rows="3" placeholder="Share your prayer point and scriptures you are standing on..." required></textarea>
+        </div>
+        <button type="submit" class="btn-submit" style="background:var(--danger-red);">🔥 Submit to Prayer Warriors Altar</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4. KINGDOM GIVING / TITHES MODAL (ZMW & Cards) -->
+  <div class="modal-backdrop" id="modalGiving">
+    <div class="modal-box">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <div style="font-size:17px; font-weight:bold; display:flex; align-items:center; gap:8px;">
+          <span>🕊️</span> JCRGM Kingdom Giving
+        </div>
+        <button onclick="closeModal('modalGiving')" style="background:none; border:none; color:var(--text-muted); font-size:20px; cursor:pointer;">✕</button>
+      </div>
+      <p style="font-size:12px; color:var(--text-muted); margin-bottom:14px;">
+        "Bring all the tithes into the storehouse, that there may be food in My house..." (Malachi 3:10)
+      </p>
+      <div class="form-group">
+        <label class="form-label">Category:</label>
+        <select class="form-input">
+          <option>Tithe (Malachi 3:10)</option>
+          <option>Sunday General Offering</option>
+          <option>Sanctuary Building & Meanwood Expansion</option>
+          <option>Rural Missions & Crusade Outreach</option>
+          <option>Widows & Benevolence Care</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Payment Gateway (Airtel, MTN, ZMW, Bank):</label>
+        <div style="display:flex; gap:8px;">
+          <button type="button" style="flex:1; background:var(--wa-primary-dark); color:white; border:none; padding:10px; border-radius:10px; font-size:12px; font-weight:bold;">📱 Airtel / MTN</button>
+          <button type="button" style="flex:1; background:var(--bg-panel); color:white; border:1px solid #2a3942; padding:10px; border-radius:10px; font-size:12px;">💳 Visa / Card</button>
+          <button type="button" style="flex:1; background:var(--bg-panel); color:white; border:1px solid #2a3942; padding:10px; border-radius:10px; font-size:12px;">🏛️ Bank Deposit</button>
+        </div>
+      </div>
+      <button type="button" class="btn-submit" onclick="submitGivingSeed()">Sow Kingdom Seed</button>
+    </div>
+  </div>
+
+  <!-- 5. INSTALL APP POPUP -->
+  <div class="modal-backdrop" id="modalInstall" style="display:flex;">
+    <div class="modal-box" style="text-align:center;">
+      <div style="width:64px; height:64px; background:#070b18; border:2px solid var(--gold-primary); border-radius:20px; margin:0 auto 14px; display:flex; align-items:center; justify-content:center; font-size:32px; color:var(--gold-primary); box-shadow:0 0 16px rgba(220,185,85,0.4);">
+        ✝
+      </div>
+      <h3 style="font-size:18px; font-weight:bold; margin-bottom:6px;">The JCRGM Community</h3>
+      <p style="font-size:12.5px; color:var(--gold-primary); font-weight:bold; margin-bottom:4px;">Jesus Christ Redeems Global Ministries</p>
+      <p style="font-size:12px; color:var(--text-muted); margin-bottom:20px; line-height:1.5;">
+        Install the official church app directly on your phone or PC for instant notifications, Sunday live streaming, audio/video prayer line, and full-screen view.
+      </p>
+      <button style="width:100%; background:var(--wa-accent); color:white; border:none; padding:14px; border-radius:12px; font-size:15px; font-weight:bold; cursor:pointer; margin-bottom:10px;" onclick="triggerAppInstall()">
+        Install The JCRGM App
+      </button>
+      <button style="background:transparent; border:none; color:var(--text-muted); font-size:13px; cursor:pointer;" onclick="closeModal('modalInstall')">
+        Continue in Browser
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let deferredPrompt = null;
+    let callTimerInterval = null;
+    let callSeconds = 0;
+
+    // Listen for PWA Install
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById('modalInstall').style.display = 'flex';
+    });
+
+    // Push Notifications Request (WhatsApp-Style)
+    function enablePushNotifications() {
+      if ('Notification' in window) {
+        Notification.requestPermission().then(permission => {
+          if (permission === 'granted') {
+            document.getElementById('notifBar').style.display = 'none';
+            new Notification("The JCRGM Community", {
+              body: "Notifications enabled! You will now receive instant prayer and service updates.",
+              icon: "favicon.svg"
+            });
+          } else {
+            alert("Notification permission denied or dismissed. You can enable it in browser site settings.");
+          }
         });
+      } else {
+        alert("Push notifications are not supported in this browser.");
       }
-    </script>
-  </body>
+    }
+
+    // 1. SWITCHING PRIMARY VIEWS (Chats, Live, Bible, Sermons, Events)
+    function switchMainTab(tab) {
+      document.querySelectorAll('.strip-btn').forEach(b => b.classList.remove('active'));
+      const activeBtn = document.getElementById('strip-' + tab);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      document.getElementById('screen-chats').style.display = (tab === 'chats') ? 'flex' : 'none';
+      document.getElementById('screen-live').classList.toggle('active', tab === 'live');
+      document.getElementById('screen-bible').classList.toggle('active', tab === 'bible');
+      document.getElementById('screen-sermons').classList.toggle('active', tab === 'sermons');
+      document.getElementById('screen-events').classList.toggle('active', tab === 'events');
+    }
+
+    // 2. CONVERSATION SWITCHER
+    const CONVERSATIONS = {
+      'prophet_office': {
+        title: "Prophet's Office (Bishop E. Sakala) ✉️",
+        status: "Online • Prophetic Consultation & Deliverance Desk",
+        avatar: "👑",
+        pinned: "Meanwood Ndeke Phase 2, Lusaka. WhatsApp: 0979 554 970. Inquiries open daily."
+      },
+      'announcements': {
+        title: "General Announcements 🏛️",
+        status: "840 Brethren • Pastoral Oversight",
+        avatar: "📢",
+        pinned: "3-Day Fasting and Prayer Revival Programme starts this Wednesday at 6:00 PM."
+      },
+      'sunday': {
+        title: "Sunday Live Service 🕊️",
+        status: "512 Brethren Online • Live Sanctuary Discussion",
+        avatar: "⛪",
+        pinned: "Theme: UNCOMMON HARVEST & DIVINE ACCELERATION (Amos 9:13)."
+      },
+      'prayer': {
+        title: "Prayer Warriors Altar 🙏",
+        status: "420 Intercessors • 24/7 Altar of Agreement",
+        avatar: "🔥",
+        pinned: "Midnight Vigil link and altar intercession for all church families."
+      },
+      'rhema': {
+        title: "Daily Rhema & Word 📖",
+        status: "Morning Manna • Quiet Time Meditation",
+        avatar: "🌅",
+        pinned: "Today Rhema: 'The Secret Place of Peace' (Psalm 91:1-2)."
+      },
+      'sister_mary': {
+        title: "Sister Mary (Choir Lead)",
+        status: "Online",
+        avatar: "👩🏾",
+        pinned: "Choir rehearsal schedule for Sunday service."
+      }
+    };
+
+    function loadConversation(id, elem) {
+      document.querySelectorAll('.channel-item').forEach(c => c.classList.remove('active'));
+      if (elem) elem.classList.add('active');
+
+      const data = CONVERSATIONS[id];
+      if (!data) return;
+
+      document.getElementById('headerTitle').innerText = data.title;
+      document.getElementById('headerStatus').innerText = data.status;
+      document.getElementById('headerAvatar').innerText = data.avatar;
+      document.getElementById('pinnedText').innerText = data.pinned;
+
+      switchMainTab('chats');
+    }
+
+    // 3. FOLDER CATEGORY FILTER
+    function filterFolderCategory(cat, el) {
+      document.querySelectorAll('.folder-item').forEach(i => i.classList.remove('active'));
+      el.classList.add('active');
+
+      const items = document.querySelectorAll('.channel-item');
+      items.forEach(item => {
+        if (cat === 'all' || item.getAttribute('data-cat') === cat) {
+          item.style.display = 'flex';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
+
+    // 4. CHAT MESSAGING
+    function handleComposerKey(e) {
+      if (e.key === 'Enter') sendChatMessage();
+    }
+
+    function sendChatMessage() {
+      const input = document.getElementById('chatComposerInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const scroller = document.getElementById('chatScroller');
+      const div = document.createElement('div');
+      div.className = 'msg-envelope outgoing';
+      div.innerHTML = `
+        <div class="bubble">
+          <div>${escapeHtml(text)}</div>
+          <div class="msg-meta">
+            <span>Just now</span>
+            <span class="ticks">✓✓</span>
+          </div>
+        </div>
+      `;
+      scroller.appendChild(div);
+      input.value = '';
+      scroller.scrollTop = scroller.scrollHeight;
+    }
+
+    function insertPraiseEmoji() {
+      const input = document.getElementById('chatComposerInput');
+      input.value += ' Amen! Hallelujah! 🙌 ';
+      input.focus();
+    }
+
+    function standInPrayer(btn) {
+      btn.innerText = 'Praying Amen! (Agreement Sealed 🙌)';
+      btn.style.background = '#00a884';
+      document.getElementById('altarCount').innerText = '49 Brethren Praying';
+    }
+
+    function addReaction(chip, emoji) {
+      const parts = chip.innerText.split(' ');
+      const count = parseInt(parts[1]) || 0;
+      chip.innerText = `${emoji} ${count + 1}`;
+      chip.style.borderColor = 'var(--wa-accent)';
+    }
+
+    // 5. LIVE SERVICE COMMENTS & WHATSAPP SHARING
+    function sendLiveComment() {
+      const input = document.getElementById('liveCommentInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const container = document.getElementById('liveStreamComments');
+      const p = document.createElement('div');
+      p.innerHTML = `<strong>You (Live):</strong> ${escapeHtml(text)}`;
+      container.appendChild(p);
+      input.value = '';
+    }
+
+    function shareLiveToWhatsApp() {
+      const msg = encodeURIComponent("Join us LIVE right now for Jesus Christ Redeems Global Ministries (JCRGM) Sunday Celebration Service with Bishop Emmanuel Sakala! Watch live here: " + window.location.href);
+      window.open("https://api.whatsapp.com/send?text=" + msg, "_blank");
+    }
+
+    // 6. HOLY SCRIPTURE BIBLE
+    const CHAPTERS = {
+      'psalm23': {
+        title: '📖 Psalm 23 (NKJV) — The Good Shepherd',
+        verses: [
+          'The LORD is my shepherd; I shall not want.',
+          'He makes me to lie down in green pastures; He leads me beside the still waters.',
+          'He restores my soul; He leads me in the paths of righteousness For His name’s sake.',
+          'Yea, though I walk through the valley of the shadow of death, I will fear no evil; For You are with me; Your rod and Your staff, they comfort me.',
+          'You prepare a table before me in the presence of my enemies; You anoint my head with oil; My cup runs over.',
+          'Surely goodness and mercy shall follow me All the days of my life; And I will dwell in the house of the LORD Forever.'
+        ]
+      },
+      'john14': {
+        title: '📖 John 14 (NKJV) — The Way, Truth, and Life',
+        verses: [
+          '“Let not your heart be troubled; you believe in God, believe also in Me.',
+          'In My Father’s house are many mansions; if it were not so, I would have told you. I go to prepare a place for you.',
+          'Jesus said to him, “I am the way, the truth, and the life. No one comes to the Father except through Me.”',
+          '“Peace I leave with you, My peace I give to you; not as the world gives do I give to you. Let not your heart be troubled, neither let it be afraid.”'
+        ]
+      },
+      'phil4': {
+        title: '📖 Philippians 4 (NKJV) — Rejoice in the Lord',
+        verses: [
+          'Rejoice in the Lord always. Again I will say, rejoice!',
+          'Be anxious for nothing, but in everything by prayer and supplication, with thanksgiving, let your requests be made known to God;',
+          'and the peace of God, which surpasses all understanding, will guard your hearts and minds through Christ Jesus.',
+          'I can do all things through Christ who strengthens me.',
+          'And my God shall supply all your need according to His riches in glory by Christ Jesus.'
+        ]
+      },
+      'romans8': {
+        title: '📖 Romans 8 (NKJV) — More Than Conquerors',
+        verses: [
+          'There is therefore now no condemnation to those who are in Christ Jesus.',
+          'And we know that all things work together for good to those who love God, to those who are the called according to His purpose.',
+          'What then shall we say to these things? If God is for us, who can be against us?',
+          'Yet in all these things we are more than conquerors through Him who loved us.'
+        ]
+      },
+      'isaiah40': {
+        title: '📖 Isaiah 40 (NKJV) — Renewing Strength in the Lord',
+        verses: [
+          'Comfort, yes, comfort My people! says your God.',
+          'The grass withers, the flower fades, But the word of our God stands forever.',
+          'He gives power to the weak, And to those who have no might He increases strength.',
+          'Those who wait on the LORD Shall renew their strength; They shall mount up with wings like eagles!'
+        ]
+      }
+    };
+
+    let activeChapterKey = 'psalm23';
+
+    function loadBibleChapter(key, btn) {
+      document.querySelectorAll('.btn-book').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      activeChapterKey = key;
+
+      const ch = CHAPTERS[key];
+      if (!ch) return;
+
+      document.getElementById('bibleChapterTitle').innerText = ch.title;
+      let html = '';
+      ch.verses.forEach((v, i) => {
+        html += `<div class="verse-p"><span class="verse-idx">${i + 1}</span> ${v}</div>`;
+      });
+      document.getElementById('bibleVersesList').innerHTML = html;
+    }
+
+    function sharePassageToChat() {
+      const ch = CHAPTERS[activeChapterKey];
+      if (!ch) return;
+      switchMainTab('chats');
+      const input = document.getElementById('chatComposerInput');
+      input.value = `📖 *${ch.title}*\n"${ch.verses[0]}"\n— Shared from JCRGM Bible Study`;
+      input.focus();
+    }
+
+    // 7. CALL ENGINE
+    function startCall(type) {
+      const isVideo = type === 'video';
+      document.getElementById('callTypeLabel').innerText = isVideo ? 'Live HD Video Call' : 'Voice Prayer Call';
+      document.getElementById('callTargetName').innerText = document.getElementById('headerTitle').innerText;
+      document.getElementById('callAvatar').innerText = isVideo ? '📹' : '👑';
+      
+      document.getElementById('modalCall').style.display = 'flex';
+      callSeconds = 0;
+      clearInterval(callTimerInterval);
+      callTimerInterval = setInterval(() => {
+        callSeconds++;
+        const m = String(Math.floor(callSeconds / 60)).padStart(2, '0');
+        const s = String(callSeconds % 60).padStart(2, '0');
+        document.getElementById('callTimer').innerText = `${m}:${s}`;
+      }, 1000);
+    }
+
+    function endCall() {
+      clearInterval(callTimerInterval);
+      document.getElementById('modalCall').style.display = 'none';
+    }
+
+    function toggleMuteMic(btn) {
+      btn.classList.toggle('muted');
+      btn.innerText = btn.classList.contains('muted') ? '🔇' : '🎤';
+    }
+
+    function toggleCamera(btn) {
+      btn.classList.toggle('muted');
+      btn.innerText = btn.classList.contains('muted') ? '🚫' : '📹';
+    }
+
+    // 8. ADD FRIEND BY PHONE / EMAIL
+    function handleAddFriend(e) {
+      e.preventDefault();
+      const name = document.getElementById('friendName').value.trim();
+      const phone = document.getElementById('friendPhone').value.trim();
+      const dept = document.getElementById('friendDept').value;
+      if (!name) return;
+
+      const container = document.getElementById('channelListContainer');
+      const newElem = document.createElement('div');
+      newElem.className = 'channel-item';
+      newElem.setAttribute('data-cat', 'direct');
+      newElem.innerHTML = `
+        <div class="channel-avatar">👤<div class="online-badge"></div></div>
+        <div class="channel-info">
+          <div class="channel-top-row">
+            <span class="channel-title">${escapeHtml(name)}</span>
+            <span class="channel-time">Just now</span>
+          </div>
+          <div class="channel-preview">${escapeHtml(phone || dept)}</div>
+        </div>
+      `;
+
+      const id = 'user_' + Date.now();
+      CONVERSATIONS[id] = {
+        title: `${name} (${dept})`,
+        status: `Online • ${phone || 'Member'}`,
+        avatar: '👤',
+        pinned: `Connected with ${name} via The JCRGM Community.`
+      };
+
+      newElem.onclick = function() { loadConversation(id, newElem); };
+      container.prepend(newElem);
+
+      closeModal('modalAddFriend');
+      loadConversation(id, newElem);
+      alert(`Brother/Sister ${name} added to your direct fellowship!`);
+    }
+
+    // 9. PRAYER ALTAR & GIVING
+    function handleAltarSubmit(e) {
+      e.preventDefault();
+      const cat = document.getElementById('petitionCategory').value;
+      const text = document.getElementById('petitionText').value;
+
+      closeModal('modalAltar');
+      loadConversation('prayer', null);
+
+      const scroller = document.getElementById('chatScroller');
+      const div = document.createElement('div');
+      div.className = 'msg-envelope outgoing';
+      div.innerHTML = `
+        <div class="bubble">
+          <div style="font-size:11px; font-weight:bold; color:#fda4af; margin-bottom:4px;">🔥 ALTAR PETITION: [${cat.toUpperCase()}]</div>
+          <div>${escapeHtml(text)}</div>
+          <div class="msg-meta">
+            <span>Just now</span>
+            <span class="ticks">✓✓</span>
+          </div>
+        </div>
+      `;
+      scroller.appendChild(div);
+      scroller.scrollTop = scroller.scrollHeight;
+    }
+
+    function submitGivingSeed() {
+      alert("Kingdom seed received! May God open the windows of heaven upon you (Malachi 3:10). Reference: JCRGM-" + Math.floor(100000 + Math.random()*900000));
+      closeModal('modalGiving');
+    }
+
+    function toggleRadioStream(btn) {
+      if (btn.innerText.includes('OFF')) {
+        btn.innerText = '📻 24/7 Church Radio: STREAMING NOW';
+        btn.style.background = 'var(--wa-accent)';
+      } else {
+        btn.innerText = '📻 24/7 Church Radio: OFF';
+        btn.style.background = 'var(--danger-red)';
+      }
+    }
+
+    function playAudioMessage(btn, title) {
+      if (btn.innerText.includes('Listen')) {
+        btn.innerText = '⏸️ Playing: ' + title;
+        btn.style.background = 'var(--danger-red)';
+      } else {
+        btn.innerText = '▶ Listen to Sermon';
+        btn.style.background = 'var(--wa-primary)';
+      }
+    }
+
+    // Modal Helpers
+    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+    function triggerAppInstall() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(() => closeModal('modalInstall'));
+      } else {
+        alert("To install: Tap the browser menu (⋮) or Safari Share (⎋) and choose 'Add to Home Screen' or 'Install App'.");
+        closeModal('modalInstall');
+      }
+    }
+
+    function filterSearch(val) {
+      const q = val.toLowerCase();
+      document.querySelectorAll('.channel-item').forEach(item => {
+        const text = item.innerText.toLowerCase();
+        item.style.display = text.includes(q) ? 'flex' : 'none';
+      });
+    }
+
+    function showChannelInfo() {
+      alert("The JCRGM Community\nJesus Christ Redeems Global Ministries\nProphet's Office: Bishop Emmanuel Sakala\nMeanwood Ndeke Phase 2, Lusaka, Zambia\nWhatsApp: 0979 554 970");
+    }
+
+    function focusPinnedAdvisory() {
+      alert(document.getElementById('pinnedText').innerText);
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    // Register Service Worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+  </script>
+</body>
 </html>
