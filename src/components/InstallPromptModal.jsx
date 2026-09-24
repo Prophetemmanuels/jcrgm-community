@@ -1,51 +1,40 @@
 import React, { useState, useEffect } from 'react';
-import { Download, X, Smartphone, ShieldCheck, Sparkles } from 'lucide-react';
+import { Download, X, Smartphone, ShieldCheck, Sparkles, CheckCircle2 } from 'lucide-react';
 
 export default function InstallPromptModal() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
-  const [showPrompt, setShowPrompt] = useState(false);
+  const [showPrompt, setShowPrompt] = useState(true); // Default open so you can see and test immediately
   const [isIOS, setIsIOS] = useState(false);
-  const [isInstalled, setIsInstalled] = useState(false);
+  const [installedSuccess, setInstalledSuccess] = useState(false);
 
   useEffect(() => {
-    // Check if already in standalone (installed) mode
+    // Check if in standalone mode (already installed)
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
                          window.navigator.standalone === true;
-    if (isStandalone) {
-      setIsInstalled(true);
-      return;
-    }
-
-    // Check if user dismissed previously in this session
-    const dismissed = sessionStorage.getItem('jcrgm_install_dismissed');
-    if (dismissed) return;
 
     // Detect iOS
-    const userAgent = window.navigator.userAgent.toLowerCase();
-    const isIosDevice = /iphone|ipad|ipod/.test(userAgent);
-    setIsIOS(isIosDevice);
+    const ua = window.navigator.userAgent.toLowerCase();
+    const iosDevice = /iphone|ipad|ipod/.test(ua);
+    setIsIOS(iosDevice);
 
-    // Standard Chromium beforeinstallprompt listener
-    const handleBeforeInstallPrompt = (e) => {
+    // Capture Chrome/Edge install prompt
+    const handleBeforeInstall = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
-      // Auto-show prompt shortly after page load
-      setTimeout(() => {
-        setShowPrompt(true);
-      }, 1500);
+      setShowPrompt(true);
     };
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
 
-    // For iOS or browsers without beforeinstallprompt, auto-prompt after 2 seconds
+    // Show prompt automatically after 800ms
     const timer = setTimeout(() => {
-      if (!isStandalone && !sessionStorage.getItem('jcrgm_install_dismissed')) {
+      if (!isStandalone) {
         setShowPrompt(true);
       }
-    }, 2000);
+    }, 800);
 
     return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
       clearTimeout(timer);
     };
   }, []);
@@ -53,28 +42,27 @@ export default function InstallPromptModal() {
   const handleInstallClick = async () => {
     if (deferredPrompt) {
       deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') {
-        setShowPrompt(false);
+      const choice = await deferredPrompt.userChoice;
+      if (choice.outcome === 'accepted') {
+        setInstalledSuccess(true);
+        setTimeout(() => setShowPrompt(false), 2000);
       }
       setDeferredPrompt(null);
+    } else {
+      // Direct instruction fallback if browser doesn't expose deferred prompt
+      alert('To install: Tap your browser menu (⋮ or Share icon ⎋) and select "Add to Home screen" or "Install App".');
     }
   };
 
-  const handleDismiss = () => {
-    setShowPrompt(false);
-    sessionStorage.setItem('jcrgm_install_dismissed', 'true');
-  };
-
-  if (!showPrompt || isInstalled) return null;
+  if (!showPrompt) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200">
       <div className="bg-white dark:bg-[#111b21] border border-gray-200 dark:border-gray-800 text-[#111b21] dark:text-[#e9edef] w-full max-w-md rounded-3xl p-5 shadow-2xl relative overflow-hidden">
         
         {/* Close Button */}
         <button
-          onClick={handleDismiss}
+          onClick={() => setShowPrompt(false)}
           className="absolute top-4 right-4 p-1.5 rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
           aria-label="Close"
         >
@@ -89,7 +77,7 @@ export default function InstallPromptModal() {
           <div>
             <div className="flex items-center gap-1.5">
               <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-100 dark:bg-emerald-950 text-[#008069] dark:text-[#25d366] px-2 py-0.5 rounded-full">
-                Official Church App
+                Install JCRGM App
               </span>
             </div>
             <h3 className="font-bold text-base sm:text-lg leading-tight mt-0.5">
@@ -103,17 +91,23 @@ export default function InstallPromptModal() {
 
         {/* Explanation */}
         <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 leading-relaxed mb-4">
-          Install the official WhatsApp-style church fellowship app directly on your phone or PC. Enjoy fast access, full-screen sanctuary view, and instant prayer updates.
+          Install the official WhatsApp-style church fellowship app directly on your device for fast access, full-screen sanctuary view, and instant prayer updates.
         </p>
 
         {/* Dynamic Action Area: iOS vs Android/Desktop */}
-        {isIOS ? (
+        {installedSuccess ? (
+          <div className="p-4 bg-emerald-50 dark:bg-emerald-950/40 rounded-2xl border border-emerald-300 text-center text-emerald-800 dark:text-emerald-300 space-y-1 mb-4">
+            <CheckCircle2 size={28} className="mx-auto text-emerald-600" />
+            <div className="font-bold text-sm">App Installed Successfully!</div>
+            <div className="text-xs">Check your home screen or apps list.</div>
+          </div>
+        ) : isIOS ? (
           <div className="bg-gray-50 dark:bg-[#202c33] p-3 rounded-2xl border border-gray-200 dark:border-gray-700 text-xs space-y-2 mb-4">
             <div className="font-bold text-[#008069] dark:text-[#25d366] flex items-center gap-1.5">
               <Smartphone size={14} /> To install on iPhone / iPad:
             </div>
             <ol className="list-decimal list-inside space-y-1 text-gray-600 dark:text-gray-300">
-              <li>Tap the <strong>Share</strong> button (box with upward arrow <span className="text-base leading-none">⎋</span>) at the bottom of Safari.</li>
+              <li>Tap the <strong>Share</strong> button (<span className="font-mono text-base font-bold">⎋</span> or box with arrow) in Safari.</li>
               <li>Scroll down and tap <strong>"Add to Home Screen"</strong>.</li>
               <li>Tap <strong>Add</strong> in the top right corner.</li>
             </ol>
@@ -125,10 +119,10 @@ export default function InstallPromptModal() {
               className="w-full py-3 bg-[#008069] hover:bg-[#006e58] text-white font-bold rounded-2xl shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2 cursor-pointer text-sm"
             >
               <Download size={18} />
-              Install The JCRGM App
+              Install The JCRGM App Now
             </button>
             <div className="text-center text-[11px] text-gray-400">
-              No App Store or Play Store account required • Instant & Free
+              No App Store or Play Store login required • Instant & Free
             </div>
           </div>
         )}
@@ -139,8 +133,8 @@ export default function InstallPromptModal() {
             <ShieldCheck size={13} className="text-emerald-500" /> Safe & verified
           </span>
           <button
-            onClick={handleDismiss}
-            className="hover:underline text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 font-medium"
+            onClick={() => setShowPrompt(false)}
+            className="hover:underline text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 font-medium cursor-pointer"
           >
             Continue in Browser
           </button>
