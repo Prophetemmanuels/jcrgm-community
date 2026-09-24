@@ -1,0 +1,18 @@
+{
+  "short_name": "JCRGM",
+  "name": "The JCRGM Community - Jesus Christ Reigns Gospel Ministry",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192 512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#111b21",
+  "theme_color": "#008069",
+  "display": "standalone",
+  "orientation": "portrait",
+  "description": "The official church community, prayer, Bible study, and fellowship platform for JCRGM"
+}
